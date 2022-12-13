@@ -1,131 +1,80 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
-    <head>
-        <title>ブラウン運動</title>
-        <style>
-            #canvas{
-                width: 500px;
-                height: 500px;
-                background-color: #000000;
-            }
-        </style>
+<head>
+<meta charset="UTF-8">
+<style>
+#d1{width:400px;height:400px;background-color:yellow;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.min.js"></script>
 <script>
-    let n=20;
-    let r=5;
-    let x=[];
-    let y=[];
-    let vx=[];
-    let vy=[];
-    let v=10;
-    let X;
-    let Y;
-    let R=50;
+var canvas,w,h;
+var trackball;
+var scene,renderer,camera,light;
+var sphere;
+var x,y,z;
 
-    var canvasElement;
-    var context;
-    window.addEventListener('load',function(){
-        drawStart();
-    })
-    function drawStart(){
-        canvasElement=document.getElementById('canvas');
-        canvasElement.width=canvasElement.clientWidth;
-        canvasElement.height=canvasElement.clientHeight;
-        context=canvasElement.getContext('2d');
 
-        document.getElementById("n").value = n;
-        document.getElementById("v").value = v;
-        document.getElementById("r").value = r;        
-        document.getElementById("R").value = R;        
+window.addEventListener('load',init);
+function init(){
+	x=0;
+	y=0;
+	z=50;
 
-        initState();
-        loop();
 
-    }
-    function initState(){
-        for(let i=0;i<n;i++){
-            x[i]=Math.random()*500;
-            y[i]=Math.random()*500;
+	canvas=document.getElementById('d1');
+	w=canvas.clientWidth;
+	h=canvas.clientHeight;
 
-            a=Math.random()*Math.PI*2;
-            vx[i]=v*Math.sin(a);
-            vy[i]=v*Math.cos(a);
-            
-        }
-        X=250;
-        Y=250;
+	scene=new THREE.Scene();
 
-    }
-    function clickBtn1(){
-        n=document.getElementById("n").value;
-        v=document.getElementById("v").value;
-        r=parseInt(document.getElementById("r").value);
-        R=parseInt(document.getElementById("R").value);
-        initState();
+	renderer=new THREE.WebGLRenderer({antialias:true});
+	renderer.setSize(w,h);
+	renderer.setClearColor(0x000000);
+	renderer.shadowMap.enabled=true;
+	canvas.appendChild(renderer.domElement);
 
-    }
-    function loop(){
-        
-        var width=canvasElement.width;
-        var height=canvasElement.height;
-        
-        context.clearRect(0,0,width,height);
-        
+	camera=new THREE.PerspectiveCamera(45,w/h,0.1,1000);
+	camera.position.set(100,100,20);
+	camera.up.set(0,0,1);
+	camera.lookAt(scene.position);
 
-        for(let i=0;i<n;i++){
-            x[i]+=vx[i];
-            y[i]+=vy[i];
-        
-            if(x[i]<r || x[i]>width-r){
-                vx[i]=-vx[i];
-            }
-            if(y[i]<r || y[i]>height-r){
-                vy[i]=-vy[i]
-            }
-        
-            L=(X-x[i])*(X-x[i])+(Y-y[i])*(Y-y[i])
-            l=(R+r)*(R+r);
 
-            if(l>L){
-                X+=vx[i]/2;
-                Y+=vy[i]/2
-                vx[i]=-vx[i];
-                vy[i]=-vy[i];
-                x[i]+=vx[i];
-                y[i]+=vy[i];
-                
-            }
-        
-        
-            context.beginPath();
-            context.arc(x[i],y[i],r,0,2*Math.PI,false);
-            context.closePath();
-            context.fillStyle="#888888";    
-            context.fill();
+	light=new THREE.DirectionalLight(0xffffff,1);
+	light.position.set(100,100,200);
+	light.castShadow=true;
+	light.shadow.camera.right=-100;
+	light.shadow.camera.left=100;
+	light.shadow.camera.top=100;
+	light.shadow.camera.bottom=-100;
+	light.shadow.mapSize.width=2048;
+	light.shadow.mapSize.height=2048;
+	scene.add(light);
 
-            context.beginPath();
-            context.arc(X,Y,R,0,2*Math.PI,false);
-            context.closePath();
-            context.fillStyle="#FFFFFF";    
-            context.fill();
+	sphere=new THREE.Mesh(new THREE.SphereGeometry(5,100,100),new THREE.MeshLambertMaterial({color:0xffffff}));
+	sphere.castShadow=true;		
+	scene.add(sphere);
 
-        }
+	plane=new THREE.Mesh(new THREE.PlaneGeometry(100,100,0,0),new THREE.MeshLambertMaterial({color:0xffffff}));
+	plane.receiveShadow=true;
+	scene.add(plane);	
 
-        requestAnimationFrame(loop)
-    }
+	loop();
+	
+	document.getElementById('d2').textContent="bbb";
+}
+function loop(){
+	sphere.position.set(x,y,z);
+	
+	
+	renderer.render(scene,camera);	
+	
+	z-=0.1;
+	requestAnimationFrame(loop);
+}
 </script>
-    </head>
-    <body>
-        <canvas id='canvas'></canvas>
-        <br>
-        <Lavel>n=</Lavel>
-        <input type="text" id="n" size="1"/>
-        <Lavel>v=</Lavel>
-        <input type="text" id="v" size="1"/>
-        <Lavel>r=</Lavel>
-        <input type="text" id="r" size="1"/>
-        <Lavel>R=</Lavel>
-        <input type="text" id="R" size="1"/>
-        <input type="button" value="最初から" onclick="clickBtn1()" />
-
-    </body>
+</head>
+<body>
+<div id="d1"></div>
+<a id="d2">aaa</a>
+</body>
 </html>
